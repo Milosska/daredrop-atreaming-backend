@@ -5,7 +5,7 @@ const genreOptions = [
   "challenge",
   "comedy",
   "creative",
-  "educatuinal",
+  "educational",
   "games",
   "interview",
   "irl",
@@ -39,6 +39,8 @@ const CreateStreamerSchema = Joi.object({
       "description length must be less than or equal to 1000 characters",
     "any.required": "field 'username' is missing",
   }),
+  upvote: Joi.number(),
+  downvote: Joi.number(),
 });
 
 module.exports = {

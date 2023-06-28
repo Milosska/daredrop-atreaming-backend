@@ -14,7 +14,7 @@ const schema = new Schema(
         "challenge",
         "comedy",
         "creative",
-        "educatuinal",
+        "educational",
         "games",
         "interview",
         "irl",
