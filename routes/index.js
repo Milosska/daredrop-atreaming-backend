@@ -3,7 +3,7 @@ const { streamersRouter } = require("./streamersRouter");
 
 const router = Router();
 
-router.use("/streamers", streamersRouter);
+router.use("/api/streamers", streamersRouter);
 
 module.exports = {
   rootRouter: router,
