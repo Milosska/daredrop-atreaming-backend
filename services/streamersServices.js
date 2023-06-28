@@ -1,3 +1,6 @@
+const fs = require("fs/promises");
+const path = require("path");
+const Jimp = require("jimp");
 const { Streamer } = require("../models/Streamer");
 const { HttpError } = require("../utils/HttpError");
 
@@ -21,13 +24,34 @@ const getStreamersService = async (query) => {
   });
 };
 
-const createStreamerService = async (body) => {
+const createStreamerService = async (file, body) => {
+  const { path: oldPath, filename } = file;
+
   const fetchedStreamer = await Streamer.findOne({ name: body.name });
   if (fetchedStreamer) {
     throw new HttpError(409, "Streamer with this name is already in the base");
   }
 
-  return await Streamer.create({ ...body });
+  const resizedImg = await Jimp.read(oldPath)
+    .then((file) => {
+      return file.cover(450, 600).write(oldPath);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+
+  const newPath = `${path.join(
+    process.cwd(),
+    "public",
+    "streamers",
+    filename
+  )}`;
+  await fs.rename(oldPath, newPath);
+
+  return await Streamer.create({
+    ...body,
+    photoURL: `${path.join("streamers", filename)}`,
+  });
 };
 
 const getStreamerByIdService = async (streamerId) => {

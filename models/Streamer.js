@@ -34,6 +34,9 @@ const schema = new Schema(
       type: String,
       required: true,
     },
+    photoURL: {
+      type: String,
+    },
     upvote: {
       type: Number,
       min: 0,
