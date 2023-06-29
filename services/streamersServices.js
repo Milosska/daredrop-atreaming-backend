@@ -3,6 +3,7 @@ const path = require("path");
 const Jimp = require("jimp");
 const { Streamer } = require("../models/Streamer");
 const { HttpError } = require("../utils/HttpError");
+const { cloudinaryImgSave } = require("../utils/cloudinary/cloudinaryAPI");
 
 const getStreamersService = async (query) => {
   const { page = 1, limit = 10, platform, genre } = query;
@@ -32,7 +33,7 @@ const createStreamerService = async (file, body) => {
     throw new HttpError(409, "Streamer with this name is already in the base");
   }
 
-  const resizedImg = await Jimp.read(oldPath)
+  await Jimp.read(oldPath)
     .then((file) => {
       return file.cover(450, 600).write(oldPath);
     })
@@ -40,17 +41,11 @@ const createStreamerService = async (file, body) => {
       console.error(err);
     });
 
-  const newPath = `${path.join(
-    process.cwd(),
-    "public",
-    "streamers",
-    filename
-  )}`;
-  await fs.rename(oldPath, newPath);
+  const fileDataPhoto = await cloudinaryImgSave(oldPath, "streamers_photo");
 
   return await Streamer.create({
     ...body,
-    photoURL: `${path.join("streamers", filename)}`,
+    photoURL: fileDataPhoto.secure_url,
   });
 };
 
