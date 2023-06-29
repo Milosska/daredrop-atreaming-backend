@@ -14,6 +14,7 @@ const getStreamersController = catchAsyncWrapper(async (req, res, next) => {
 const createStreamerController = catchAsyncWrapper(async (req, res, next) => {
   const newStreamer = await createStreamerService(req.file, req.body);
   res.status(201).json(newStreamer);
+  res.status(201);
 });
 
 const getStreamerByIdController = catchAsyncWrapper(async (req, res, next) => {
