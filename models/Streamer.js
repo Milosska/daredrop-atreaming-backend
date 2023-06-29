@@ -51,8 +51,16 @@ const schema = new Schema(
   {
     versionKey: false,
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+schema.virtual("rating").get(function () {
+  const ratingRatio = this.upvote / (this.upvote + this.downvote);
+  const rating = Math.round(ratingRatio * 5 * 100) / 100;
+  return rating;
+});
 
 schema.post("save", handleMongooseError);
 
