@@ -6,7 +6,7 @@ const { HttpError } = require("../utils/HttpError");
 const { cloudinaryImgSave } = require("../utils/cloudinary/cloudinaryAPI");
 
 const getStreamersService = async (query) => {
-  const { page = 1, limit = 10, platform, genre } = query;
+  const { page = 1, limit = 10, platform, genre, sort } = query;
 
   const skip = (page - 1) * limit;
   const queryFilter = {};
@@ -19,10 +19,41 @@ const getStreamersService = async (query) => {
     queryFilter.genre = genre;
   }
 
-  return await Streamer.find({ ...queryFilter }, "-updatedAt", {
-    skip,
-    limit,
-  });
+  const totalCount = await Streamer.aggregate()
+    .match({
+      ...queryFilter,
+    })
+    .count("totalCount");
+
+  let sortParams;
+
+  switch (sort) {
+    case "newest":
+      sortParams = { createdAt: -1 };
+      break;
+
+    case "oldest":
+      sortParams = { createdAt: 1 };
+      break;
+
+    case "upvote":
+      sortParams = { upvote: -1 };
+      break;
+
+    case "downvote":
+      sortParams = { downvote: -1 };
+      break;
+
+    default:
+      sortParams = {};
+  }
+
+  const streamers = await Streamer.find({ ...queryFilter })
+    .sort({ ...sortParams })
+    .skip(skip)
+    .limit(limit);
+
+  return { results: streamers, totalCount: totalCount[0].totalCount };
 };
 
 const createStreamerService = async (file, body) => {
