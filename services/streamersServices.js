@@ -19,11 +19,19 @@ const getStreamersService = async (query) => {
     queryFilter.genre = genre;
   }
 
-  const totalCount = await Streamer.aggregate()
-    .match({
-      ...queryFilter,
-    })
-    .count("totalCount");
+  let totalCount;
+
+  try {
+    const findedDocs = await Streamer.aggregate()
+      .match({
+        ...queryFilter,
+      })
+      .count("totalCount");
+
+    totalCount = findedDocs[0].totalCount;
+  } catch (err) {
+    totalCount = 0;
+  }
 
   let sortParams;
 
@@ -53,7 +61,7 @@ const getStreamersService = async (query) => {
     .skip(skip)
     .limit(limit);
 
-  return { results: streamers, totalCount: totalCount[0].totalCount };
+  return { results: streamers, totalCount };
 };
 
 const createStreamerService = async (file, body) => {
