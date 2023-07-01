@@ -43,6 +43,12 @@ const CreateStreamerSchema = Joi.object({
   downvote: Joi.number(),
 });
 
+const UpdateStreamerVotesSchema = Joi.object().keys({
+  upvote: CreateStreamerSchema.extract("upvote"),
+  downvote: CreateStreamerSchema.extract("downvote"),
+});
+
 module.exports = {
   CreateStreamerSchema,
+  UpdateStreamerVotesSchema,
 };

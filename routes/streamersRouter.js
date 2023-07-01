@@ -4,6 +4,7 @@ const { isValidId } = require("../utils/isValidId");
 const { fileUpload } = require("../utils/fileUpload");
 const {
   CreateStreamerSchema,
+  UpdateStreamerVotesSchema,
 } = require("../utils/validation/streamersValidationSchemas");
 const {
   getStreamersController,
@@ -25,7 +26,9 @@ router
 
 router.route("/:streamerId").get(isValidId, getStreamerByIdController);
 
-router.route("/:streamerId/vote").put(isValidId, updateStreamerVote);
+router
+  .route("/:streamerId/vote")
+  .put(isValidId, validateBody(UpdateStreamerVotesSchema), updateStreamerVote);
 
 module.exports = {
   streamersRouter: router,

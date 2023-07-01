@@ -1,0 +1,492 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "1.0.0",
+    "title": "Dare Drop Streaming",
+    "description": "Dare Drop streaming service test task"
+  },
+  "consumes": ["application/json", "multipart/form-data"],
+  "produces": ["application/json"],
+  "servers": [
+    {
+      "url": "https://daredrop-streaming-backend.onrender.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Streamers",
+      "description": "Streamers data endpoints"
+    }
+  ],
+  "paths": {
+    "/api/streamers": {
+      "get": {
+        "tags": ["Streamers"],
+        "summary": "An endpoint to return all the stored streamer submissions in response to a request from the frontend.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "string",
+            "description": "Pagination page"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "type": "string",
+            "description": "Number of recived docs per page"
+          },
+          {
+            "in": "query",
+            "name": "platform",
+            "required": false,
+            "type": "string",
+            "schema": {
+              "type": "string",
+              "enum": ["youtube", "tiktok", "twitch", "kick", "rumble"]
+            },
+            "description": "Streamer filter by platform"
+          },
+          {
+            "in": "query",
+            "name": "genre",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "alternative",
+                "challenge",
+                "comedy",
+                "creative",
+                "educational",
+                "games",
+                "interview",
+                "irl",
+                "movies",
+                "reactions",
+                "tutorials",
+                "webcasts"
+              ]
+            },
+            "description": "Streamer filter by genre"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "type": "string",
+            "schema": {
+              "type": "string",
+              "enum": ["newest", "oldest", "upvote", "downvote"]
+            },
+            "description": "Streamer filter additional params"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStreamersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Streamers"],
+        "summary": "An endpoint to receive new streamer submissions from the frontend and store them in a database.",
+        "parameters": [],
+        "requestBody": {
+          "description": "Streamer data object",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamerSubmitionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleStreamerDataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "File extension should be .jpeg, .jpg or .png",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Streamer with this name is already in the base",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Body validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/streamers/:streamerId": {
+      "get": {
+        "tags": ["Streamers"],
+        "summary": "An endpoint to return data about a specific streamer.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "streamerId",
+            "required": true,
+            "type": "string",
+            "description": "Streamer's personal id number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleStreamerDataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Given id is not valid id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Streamer is not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/streamers/:streamerId/vote": {
+      "put": {
+        "tags": ["Streamers"],
+        "summary": "An endpoint to receive an upvote for a specific streamer and update their current upvote/downvote count.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "streamerId",
+            "required": true,
+            "type": "string",
+            "description": "Streamer's personal id number"
+          }
+        ],
+        "requestBody": {
+          "description": "Streamer's votes data object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamerVoteUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleStreamerDataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Given id is not valid id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Streamer is not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Body validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StreamerSubmitionRequest": {
+        "type": "object",
+        "required": ["name", "genre", "platform", "description", "photo"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Streamers's name",
+            "example": "John Dou"
+          },
+          "genre": {
+            "type": "string",
+            "description": "Streamers's activity genre",
+            "enum": [
+              "alternative",
+              "challenge",
+              "comedy",
+              "creative",
+              "educational",
+              "games",
+              "interview",
+              "irl",
+              "movies",
+              "reactions",
+              "tutorials",
+              "webcasts"
+            ]
+          },
+          "platform": {
+            "type": "string",
+            "description": "Streamers's activity platform",
+            "enum": ["youtube", "tiktok", "twitch", "kick", "rumble"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Streamers's activity description",
+            "maxLength": 1000,
+            "example": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+          },
+          "photo": {
+            "type": "string",
+            "format": "binary",
+            "description": "Streamers's photo"
+          },
+          "upvote": {
+            "type": "number",
+            "description": "Streamers's upvote number (for admin use only)",
+            "example": "342"
+          },
+          "downvote": {
+            "type": "number",
+            "description": "Streamers's downvote number (for admin use only)",
+            "example": "24"
+          }
+        }
+      },
+      "StreamerVoteUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "upvote": {
+            "type": "number",
+            "description": "Streamers's upvote number",
+            "example": "342"
+          },
+          "downvote": {
+            "type": "number",
+            "description": "Streamers's downvote number",
+            "example": "24"
+          }
+        },
+        "minProperties": 1
+      },
+      "GetStreamersResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "description": "Array of streamers with data about each streamer",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Streamers's database id",
+                  "example": "507f1f77bcf86cd799439011"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Streamers's name",
+                  "example": "John Dou"
+                },
+                "genre": {
+                  "type": "string",
+                  "description": "Streamers's activity genre",
+                  "enum": [
+                    "alternative",
+                    "challenge",
+                    "comedy",
+                    "creative",
+                    "educational",
+                    "games",
+                    "interview",
+                    "irl",
+                    "movies",
+                    "reactions",
+                    "tutorials",
+                    "webcasts"
+                  ]
+                },
+                "platform": {
+                  "type": "string",
+                  "description": "Streamers's activity platform",
+                  "enum": ["youtube", "tiktok", "twitch", "kick", "rumble"]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Streamers's activity description",
+                  "example": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                },
+                "photoURL": {
+                  "type": "string",
+                  "description": "Streamers's photo link"
+                },
+                "upvote": {
+                  "type": "number",
+                  "description": "Streamers's upvote number (for admin use only)",
+                  "example": "342"
+                },
+                "downvote": {
+                  "type": "number",
+                  "description": "Streamers's downvote number (for admin use only)",
+                  "example": "24"
+                }
+              }
+            }
+          },
+          "totalCount": {
+            "type": "number",
+            "description": "Number of docs in collection that match query params"
+          }
+        }
+      },
+      "SingleStreamerDataResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Streamers's database id",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "name": {
+            "type": "string",
+            "description": "Streamers's name",
+            "example": "John Dou"
+          },
+          "genre": {
+            "type": "string",
+            "description": "Streamers's activity genre",
+            "enum": [
+              "alternative",
+              "challenge",
+              "comedy",
+              "creative",
+              "educational",
+              "games",
+              "interview",
+              "irl",
+              "movies",
+              "reactions",
+              "tutorials",
+              "webcasts"
+            ]
+          },
+          "platform": {
+            "type": "string",
+            "description": "Streamers's activity platform",
+            "enum": ["youtube", "tiktok", "twitch", "kick", "rumble"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Streamers's activity description",
+            "example": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+          },
+          "photoURL": {
+            "type": "string",
+            "description": "Streamers's photo link"
+          },
+          "upvote": {
+            "type": "number",
+            "description": "Streamers's upvote number (for admin use only)",
+            "example": "342"
+          },
+          "downvote": {
+            "type": "number",
+            "description": "Streamers's downvote number (for admin use only)",
+            "example": "24"
+          },
+          "rating": {
+            "type": "number",
+            "description": "Streamers's rating count by 5 star system",
+            "example": "4.57"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error description",
+            "example": "Here is an error description"
+          }
+        }
+      }
+    }
+  }
+}

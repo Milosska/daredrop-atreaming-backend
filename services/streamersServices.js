@@ -56,7 +56,10 @@ const getStreamersService = async (query) => {
       sortParams = {};
   }
 
-  const streamers = await Streamer.find({ ...queryFilter })
+  const streamers = await Streamer.find(
+    { ...queryFilter },
+    "-createdAt -updatedAt"
+  )
     .sort({ ...sortParams })
     .skip(skip)
     .limit(limit);
